@@ -8,7 +8,7 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 
 ## Doing
 
-- [ ] 002 - QS1 Protecting an API using Client Credentials
+
 
 ## ToDo
 
@@ -21,5 +21,10 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 
 ## Done
 
+- [x] 002 - QS1 Protecting an API using Client Credentials
+  - ~~Setup API and Identity Test server Factories~~
+  - ~~Get servers talking to each other~~
+  - ~~Golden path test~~
+  - ~~Non-golden paths tests~~
 - [x] 001 Init
   - ~~Setup repo~~
