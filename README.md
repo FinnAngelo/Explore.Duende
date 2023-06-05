@@ -8,9 +8,6 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 
 ## Doing
 
-- [ ] Init
-  - Setup repo
-
 ## ToDo
 
 - [ ] Protecting an API using Client Credentials
@@ -22,3 +19,6 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 - [ ] Building Blazor WASM client applications 
 
 ## Done
+
+- [x] Init
+  - ~~Setup repo~~
