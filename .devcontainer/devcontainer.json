@@ -1,0 +1,35 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+    "name": "C# (.NET)",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:0-7.0",
+    // Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/dotnet:1": {},
+        "ghcr.io/devcontainers/features/powershell:1": {}
+    },
+    // Run Bash script in .devcontainer directory
+    // "postCreateCommand": "/bin/bash ./.devcontainer/post-create.sh > ./.devcontainer/post-create.log",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csharp",
+                "kreativ-software.csharpextensions",
+                "formulahendry.auto-rename-tag",
+                "formulahendry.dotnet-test-explorer",
+                "PKief.material-icon-theme",
+                "patcx.vscode-nuget-gallery",
+                "alexcvzz.vscode-sqlite",
+                "ms-vscode.live-server",
+                // Markdown
+                "davidanson.vscode-markdownlint",
+                "bierner.markdown-checkbox",
+				"bierner.markdown-emoji",
+				"bierner.markdown-footnotes",
+				"bierner.markdown-preview-github-styles",
+				"bierner.markdown-mermaid",
+				"bierner.markdown-yaml-preamble"
+            ]
+        }
+    }
+}
