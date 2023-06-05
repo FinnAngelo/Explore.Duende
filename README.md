@@ -8,7 +8,7 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 
 ## Doing
 
-
+- 🙂
 
 ## ToDo
 
