@@ -1,0 +1,12 @@
+{
+    "editor.rulers": [80],
+
+    //Extensions
+    "dotnet-test-explorer.testProjectPath": "**/*.sln",
+    
+    "markdownlint.config": {
+        "MD032": false, // Lists should be surrounded by blank lines
+        "MD034": false, // Bare URL used
+        "MD026": false, // no-trailing-punctuation: Trailing punctuation in heading
+    },
+}
