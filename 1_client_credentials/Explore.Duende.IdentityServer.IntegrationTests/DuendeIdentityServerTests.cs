@@ -67,6 +67,34 @@ public class DuendeIdentityServerTests
     }
 
     [TestMethod]
+    public async Task Given_ApiClient_When_CallWeather_ThenSuccess()
+    {
+        // Given
+        var apiFactory = new WebApplicationFactory<Api::Program>();
+
+        var apiClient = apiFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://apiserver")
+        });
+
+        // When
+
+        var response = await apiClient.GetAsync("/WeatherForecast");
+
+        // Then
+
+
+        response.Should().NotBeNull();
+        response.IsSuccessStatusCode.Should().BeTrue();
+
+        var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+        var serialized = JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
+
+        serialized.Should().Be(serialized.ToString());
+    }
+
+    [TestMethod]
     public async Task Given_IdentityClient_When_CallApi_ThenSuccess()
     {
         // Given
@@ -166,14 +194,33 @@ public class DuendeIdentityServerTests
         doc[7].GetProperty("type").GetString().Should().Be("jti");// jwt id
         var jti = doc[7].GetProperty("value").GetString();
         Guid.TryParse(jti, out _).Should().BeTrue();
-
     }
 
+    // -------------------------------------------------------
+
     [TestMethod]
-    public async Task Given_ApiClient_When_CallWeather_ThenSuccess()
+    public async Task Given_NoIdentityClient_When_CallApi_ThenUnauthorized()
     {
         // Given
-        var apiFactory = new WebApplicationFactory<Api::Program>();
+
+        //-----------------------------------------------------------------
+        // API
+        var apiFactory = new WebApplicationFactory<Api::Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddAuthentication(defaultScheme: "NOT-Bearer")// NOT-Bearer to avoid conflict with actual Api::Progam auth
+                        .AddJwtBearer("NOT-Bearer", options =>
+                        {
+                            options.Authority = "https://identityserver";
+                            options.TokenValidationParameters = new TokenValidationParameters
+                            {
+                                ValidateAudience = false
+                            };
+                        });
+                });
+            });
 
         var apiClient = apiFactory.CreateClient(new WebApplicationFactoryClientOptions
         {
@@ -183,17 +230,136 @@ public class DuendeIdentityServerTests
 
         // When
 
-        var response = await apiClient.GetAsync("/WeatherForecast");
+        var response = await apiClient.GetAsync("/identity");
+
+        // Then
+        response.Should().NotBeNull();
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.IsSuccessStatusCode.Should().BeFalse();
+    }
+
+    [TestMethod]
+    public async Task Given_InvalidDetailsForIdentityClient_When_RequestAToken_ThenTokenError()
+    {
+        // Given
+        var identityFactory = new WebApplicationFactory<IdentityServer::Program>();
+
+        var identityClient = identityFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://identityserver")
+        });
+        var disco = await identityClient.GetDiscoveryDocumentAsync();
+
+        // When
+        var tokenResponse = await identityClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+        {
+            Address = disco.TokenEndpoint,
+
+            ClientId = "NOT.explore.duende.api.clientid",
+            ClientSecret = "NOT.secret",
+            Scope = "explore.duende.api"
+        });
+
+        // Then
+        tokenResponse.Should().NotBeNull();
+        tokenResponse.IsError.Should().BeTrue();
+        tokenResponse.Error.Should().Be("invalid_client");
+    }
+
+    [TestMethod]
+    public async Task Given_InvalidScopeForIdentityClient_When_RequestAToken_ThenInvalidScope()
+    {
+        // Given
+        var identityFactory = new WebApplicationFactory<IdentityServer::Program>();
+
+        var identityClient = identityFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://identityserver")
+        });
+        var disco = await identityClient.GetDiscoveryDocumentAsync();
+
+        // When
+        var tokenResponse = await identityClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+        {
+            Address = disco.TokenEndpoint,
+
+            ClientId = "explore.duende.api.clientid",
+            ClientSecret = "secret",
+            Scope = "NOT.explore.duende.api"
+        });
+
+        // Then
+        tokenResponse.Should().NotBeNull();
+        tokenResponse.IsError.Should().BeTrue();
+        tokenResponse.Error.Should().Be("invalid_scope");
+    }
+
+    [TestMethod]
+    public async Task Given_IdentityClient_When_CallApi_WithoutToken_ThenUnauthorized()
+    {
+        // Given
+        var identityFactory = new WebApplicationFactory<IdentityServer::Program>();
+
+        var identityClient = identityFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://identityserver")
+
+        });
+
+        var disco = await identityClient.GetDiscoveryDocumentAsync();
+
+        var tokenResponse = await identityClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+        {
+            Address = disco.TokenEndpoint,
+
+            ClientId = "explore.duende.api.clientid",
+            ClientSecret = "secret",
+            Scope = "explore.duende.api"
+        });
+
+        var identityHandler = identityFactory.Server.CreateHandler();
+
+        //-----------------------------------------------------------------
+        // API
+        // https://stackoverflow.com/questions/39390339/integration-testing-with-in-memory-identityserver
+        var apiFactory = new WebApplicationFactory<Api::Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddAuthentication(defaultScheme: "NOT-Bearer")// NOT-Bearer to avoid conflict with actual Api::Progam auth
+                        .AddJwtBearer("NOT-Bearer", options =>
+                        {
+                            options.Authority = "https://identityserver";
+                            options.TokenValidationParameters = new TokenValidationParameters
+                            {
+                                ValidateAudience = false
+                            };
+                            // IMPORTANT PART HERE
+                            options.BackchannelHttpHandler = identityHandler;
+                        });
+                });
+            });
+
+        var apiClient = apiFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://apiserver")
+        });
+
+        // When
+
+        var response = await apiClient.GetAsync("/identity");
 
         // Then
 
-
         response.Should().NotBeNull();
-        response.IsSuccessStatusCode.Should().BeTrue();
 
-        var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
-        var serialized = JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
-
-        serialized.Should().Be(serialized.ToString());
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.IsSuccessStatusCode.Should().BeFalse();
     }
 }
