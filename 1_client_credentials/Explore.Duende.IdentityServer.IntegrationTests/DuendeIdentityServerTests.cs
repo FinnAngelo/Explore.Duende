@@ -240,7 +240,7 @@ public class DuendeIdentityServerTests
     }
 
     [TestMethod]
-    public async Task Given_InvalidDetailsForIdentityClient_When_RequestAToken_ThenTokenError()
+    public async Task Given_InvalidDetailsForIdentityClient_When_RequestAToken_ThenInvalidClientError()
     {
         // Given
         var identityFactory = new WebApplicationFactory<IdentityServer::Program>();
@@ -269,7 +269,7 @@ public class DuendeIdentityServerTests
     }
 
     [TestMethod]
-    public async Task Given_InvalidScopeForIdentityClient_When_RequestAToken_ThenInvalidScope()
+    public async Task Given_InvalidScopeForIdentityClient_When_RequestAToken_ThenInvalidScopeError()
     {
         // Given
         var identityFactory = new WebApplicationFactory<IdentityServer::Program>();
