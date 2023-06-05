@@ -8,17 +8,18 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 
 ## Doing
 
+- [ ] 002 - QS1 Protecting an API using Client Credentials
+
 ## ToDo
 
-- [ ] Protecting an API using Client Credentials
-- [ ] Interactive Applications with ASP.NET Core
-- [ ] ASP.NET Core and API access
-- [ ] Using EntityFramework Core for configuration and operational data
-- [ ] Using ASP.NET Core Identity
-- [ ] Building JavaScript client applications
-- [ ] Building Blazor WASM client applications 
+- [ ] QS2 Interactive Applications with ASP.NET Core
+- [ ] QS3 ASP.NET Core and API access
+- [ ] QS4 Using EntityFramework Core for configuration and operational data
+- [ ] QS5 Using ASP.NET Core Identity
+- [ ] QS6 Building JavaScript client applications
+- [ ] QS7 Building Blazor WASM client applications 
 
 ## Done
 
-- [x] Init
+- [x] 001 Init
   - ~~Setup repo~~
