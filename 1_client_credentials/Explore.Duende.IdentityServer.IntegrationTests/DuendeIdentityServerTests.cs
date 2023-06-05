@@ -1,4 +1,3 @@
-
 extern alias Api;
 extern alias IdentityServer;
 
@@ -16,7 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Explore.Duende.IdentityServer.IntegrationTests;
 
 [TestClass]
-public class UnitTest1
+public class DuendeIdentityServerTests
 {
     [TestMethod]
     public async Task Given_IdentityClient_When_GetDiscoveryDocument_ThenSuccess()
@@ -134,10 +133,40 @@ public class UnitTest1
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         response.IsSuccessStatusCode.Should().BeTrue();
 
-        var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+        JsonElement doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
         var serialized = JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
-
         serialized.Should().Be(serialized.ToString());
+
+        // and
+        // https://www.rfc-editor.org/rfc/rfc7519
+        doc[0].GetProperty("type").GetString().Should().Be("iss");// issuer name
+        doc[0].GetProperty("value").GetString().Should().Be("https://identityserver");
+
+        doc[1].GetProperty("type").GetString().Should().Be("nbf");// not before
+        var nbf = doc[1].GetProperty("value").GetString() ?? "0";
+        Int32.Parse(nbf).Should().BeGreaterThan(1685933156);
+
+        doc[2].GetProperty("type").GetString().Should().Be("iat");// issued at
+        var iat = doc[2].GetProperty("value").GetString() ?? "0";
+        iat.Should().Be(nbf);
+
+        doc[3].GetProperty("type").GetString().Should().Be("exp");// expiration time
+        var exp = doc[3].GetProperty("value").GetString() ?? "0";
+        (int.Parse(exp) - int.Parse(nbf)).Should().Be(3600);
+
+        doc[4].GetProperty("type").GetString().Should().Be("aud");// audience
+        doc[4].GetProperty("value").GetString().Should().Be("https://identityserver/resources");
+
+        doc[5].GetProperty("type").GetString().Should().Be("scope");// scope... duh
+        doc[5].GetProperty("value").GetString().Should().Be("explore.duende.api");
+
+        doc[6].GetProperty("type").GetString().Should().Be("client_id");// client_id... duh.
+        doc[6].GetProperty("value").GetString().Should().Be("explore.duende.api.clientid");
+
+        doc[7].GetProperty("type").GetString().Should().Be("jti");// jwt id
+        var jti = doc[7].GetProperty("value").GetString();
+        Guid.TryParse(jti, out _).Should().BeTrue();
+
     }
 
     [TestMethod]

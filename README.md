@@ -17,7 +17,7 @@ My goal is to learn Duende IdentityServer by getting the quickstarts into integr
 - [ ] QS4 Using EntityFramework Core for configuration and operational data
 - [ ] QS5 Using ASP.NET Core Identity
 - [ ] QS6 Building JavaScript client applications
-- [ ] QS7 Building Blazor WASM client applications 
+- [ ] QS7 Building Blazor WASM client applications
 
 ## Done
 
